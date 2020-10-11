@@ -1,0 +1,36 @@
+
+    In the AWS Management Console search and select for the Redshift service.
+    Click on 1*, the cluster name, and copy the *Endpoint name.
+    Select Services and search for and select the IAM service, Roles, redshift-import, and copy the Role ARN. This will be used momentarily.
+
+    Switch to the bastion host's (cloud server) terminal and save the cluster's import name into a variable. Be sure to erase everything after the .com in the endpoint (port number and import-test):
+
+    export PGHOST=<RedshiftEndpoint>
+
+    Connect to the cluster and enter in the password, provided in this lab's description:
+
+    psql -U masteruser -p 5439 import-test
+
+    Create the tables:
+
+    create table s3_users (ID int, Name varchar, Department varchar, ExpenseCode int);   
+
+    create table dynamodb_users (ID int, Name varchar, Department varchar, ExpenseCode int);   
+
+    Import the data from DynamoDB. Be sure to replace the IAM ARN with yours.:
+
+    copy dynamodb_users from 
+     'dynamodb://redshift-import' iam_role 'paste in IAM Role ARN' readratio 50;
+
+    Query the table to ensure rows were inserted:
+
+    select * from dynamodb_users ;
+
+    Import data from the S3 bucket:
+
+    copy s3_users from 's3://redshift-import20200923/redshift-data.csv' iam_role 'paste in IAM Role ARN' delimiter ',';
+
+    Query the table to ensure rows were inserted:
+
+    select * from s3_users ;
+
